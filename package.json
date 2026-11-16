@@ -1,0 +1,14 @@
+{
+  "name": "laziless",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "pnpm --filter @laziless/web dev",
+    "build": "pnpm --filter @laziless/web build",
+    "start": "pnpm --filter @laziless/web start",
+    "test": "pnpm -r --if-present test",
+    "typecheck": "pnpm -r --if-present typecheck",
+    "lint": "pnpm -r --if-present lint"
+  },
+  "packageManager": "pnpm@10.12.1"
+}

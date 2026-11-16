@@ -1,0 +1,63 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif,
+    "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+
+  --animate-pop: pop 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  @keyframes pop {
+    from {
+      opacity: 0;
+      transform: scale(0.94);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+}
+
+/*
+ * Root size grows a little on big screens so text, cards and spacing (all rem
+ * based) scale with the full-width layout: 16px on phones/laptops, ~18px at
+ * 1920px, capped at 20px on very large monitors.
+ */
+html {
+  font-size: clamp(16px, 0.3vw + 12.5px, 20px);
+}
+
+/* Full-width page gutter: 5% of the screen on each side, never less than 1rem. */
+@utility page-x {
+  width: 100%;
+  padding-inline: max(1rem, 5%);
+}
+
+/*
+ * Fluid type scale: grows with screen width, clamped between a phone-friendly
+ * minimum and a large-monitor maximum. Edit these three to resize every heading.
+ */
+@utility text-display {
+  /* Home hero headline */
+  font-size: clamp(2.75rem, 6vw, 6.5rem);
+  line-height: 1;
+  letter-spacing: -0.035em;
+}
+@utility text-title {
+  /* Page titles (Features, About, FAQ, Demo) */
+  font-size: clamp(2.5rem, 4.8vw, 5rem);
+  line-height: 1.05;
+  letter-spacing: -0.03em;
+}
+@utility text-heading {
+  /* Section headings */
+  font-size: clamp(2rem, 3.4vw, 3.75rem);
+  line-height: 1.1;
+  letter-spacing: -0.025em;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-pop {
+    animation: none;
+  }
+}
