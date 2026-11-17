@@ -20,18 +20,52 @@ notifications.
 
 ## Commands (run from the repo root)
 
-| Command          | What it does                         |
-| ---------------- | ------------------------------------ |
-| `pnpm install`   | Install all workspace dependencies   |
-| `pnpm dev`       | Run the web app at http://localhost:3000 |
-| `pnpm test`      | Run unit tests (core)                |
-| `pnpm typecheck` | Type-check every package             |
-| `pnpm lint`      | Lint                                 |
-| `pnpm build`     | Production build of the web app      |
+| Command            | What it does                                   |
+| ------------------ | ---------------------------------------------- |
+| `pnpm install`     | Install all workspace dependencies             |
+| `pnpm dev`         | Run the web app at http://localhost:3000       |
+| `pnpm test`        | Run unit tests (core)                          |
+| `pnpm typecheck`   | Type-check every package                       |
+| `pnpm lint`        | Lint                                           |
+| `pnpm build`       | Production build of the web app                |
+| `pnpm db:generate` | Write a SQL migration from `schema.ts`         |
+| `pnpm db:migrate`  | Apply pending migrations to the database       |
+| `pnpm db:studio`   | Browse the database                            |
+
+## Data
+
+- **Activity data stays on the device.** Settings and history live in the browser's
+  localStorage (AsyncStorage on mobile). No account is needed.
+- **Postgres (Supabase)** stores only what people choose to send: mobile-app waitlist
+  emails (`laziless_waitlist`) and feedback messages (`laziless_feedback`).
+- Every table has Row Level Security on with no policies, so Supabase's auto-generated
+  REST API can't touch them. The server connects as the table owner and isn't affected.
+  Keep `.enableRLS()` on every new table in `apps/web/src/server/db/schema.ts`.
+- Schema changes: edit `schema.ts` → `pnpm db:generate` → review and commit the SQL in
+  `apps/web/drizzle/` → `pnpm db:migrate`. Avoid `db:push` once there is real data.
+
+## Deploying (Vercel)
+
+1. Import the GitHub repo in Vercel and set **Root Directory** to `apps/web`.
+   Vercel detects pnpm and the workspace automatically.
+2. Environment variables:
+
+   | Name                   | Value                                                                    |
+   | ---------------------- | ------------------------------------------------------------------------ |
+   | `DATABASE_URL`         | Supabase **Transaction pooler** string (Connect → Transaction pooler, port 6543). The direct host is IPv6-only and unreachable from Vercel. |
+   | `NEXT_PUBLIC_SITE_URL` | Your real origin, e.g. `https://laziless.app` (no trailing slash). Without it, canonical URLs, the sitemap and OG tags point at localhost. |
+
+3. Run migrations from your machine (`pnpm db:migrate`) before deploying a change that
+   needs them. Your local `.env` should use the direct (or session pooler) string.
+4. `apps/web/vercel.json` schedules a daily cron to `/api/health`, which runs `select 1`
+   so a free Supabase project doesn't pause after a week without activity.
+
+CI (`.github/workflows/ci.yml`) runs test, lint, build and typecheck on every push and
+pull request, with placeholder env values. It never connects to the real database.
 
 ## Notes
 
-- v1 stores data in the browser only; no database is needed to run it. The Postgres /
-  Drizzle setup from T3 is kept for later (e.g. syncing across web and mobile).
 - Browser notifications fire only while the browser is running. Background reminders
   will come with the mobile app (local notifications) or a PWA with push.
+- Before launch, set `contactEmail` in `apps/web/src/content/site.ts`; the privacy page
+  and footer use it.

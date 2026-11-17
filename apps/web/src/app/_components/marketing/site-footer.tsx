@@ -21,6 +21,7 @@ export function SiteFooter() {
               {item.label}
             </Link>
           ))}
+          <Link href="/privacy" className="hover:text-emerald-600">Privacy</Link>
         </nav>
 
         <div className="flex flex-col gap-2 text-sm">

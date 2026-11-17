@@ -8,7 +8,10 @@
     "start": "pnpm --filter @laziless/web start",
     "test": "pnpm -r --if-present test",
     "typecheck": "pnpm -r --if-present typecheck",
-    "lint": "pnpm -r --if-present lint"
+    "lint": "pnpm -r --if-present lint",
+    "db:generate": "pnpm --filter @laziless/web db:generate",
+    "db:migrate": "pnpm --filter @laziless/web db:migrate",
+    "db:studio": "pnpm --filter @laziless/web db:studio"
   },
   "packageManager": "pnpm@10.12.1"
 }

@@ -1,6 +1,7 @@
 import { DEFAULT_ACTIVITIES, INTERVAL_OPTIONS } from "@laziless/core";
 
 import { Card, CtaBand, Section } from "~/app/_components/marketing/blocks";
+import { WaitlistSection } from "~/app/_components/marketing/waitlist-section";
 import { features, roadmap } from "~/content/site";
 import { JsonLd, breadcrumbLd, pageMetadata } from "~/lib/seo";
 
@@ -99,6 +100,8 @@ export default function FeaturesPage() {
           ))}
         </ul>
       </Section>
+
+      <WaitlistSection source="features" />
 
       <CtaBand />
     </>

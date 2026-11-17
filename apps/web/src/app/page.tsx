@@ -9,6 +9,7 @@ import {
   TaskCardMock,
   Testimonials,
 } from "~/app/_components/marketing/blocks";
+import { WaitlistSection } from "~/app/_components/marketing/waitlist-section";
 import { features, howItWorks, principles, site } from "~/content/site";
 import { JsonLd, softwareAppLd } from "~/lib/seo";
 
@@ -44,7 +45,12 @@ export default function Home() {
               See features
             </Link>
           </div>
-          <p className="mt-4 text-sm text-stone-500">📱 iOS and Android app coming soon.</p>
+          <p className="mt-4 text-sm text-stone-500">
+            📱 iOS and Android app coming soon.{" "}
+            <a href="#app" className="font-semibold text-emerald-600 hover:underline">
+              Get notified →
+            </a>
+          </p>
         </div>
         <TaskCardMock />
       </section>
@@ -125,6 +131,8 @@ export default function Home() {
           ))}
         </div>
       </Section>
+
+      <WaitlistSection source="home" />
 
       <Testimonials />
 

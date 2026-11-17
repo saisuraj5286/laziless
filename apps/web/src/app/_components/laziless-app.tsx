@@ -3,6 +3,7 @@
 import { currentStreak, dayStats } from "@laziless/core";
 import { useEffect, useState } from "react";
 
+import { FeedbackPanel } from "~/app/_components/feedback-panel";
 import { SettingsPanel } from "~/app/_components/settings-panel";
 import { TaskCard } from "~/app/_components/task-card";
 import { TodayLog } from "~/app/_components/today-log";
@@ -87,6 +88,7 @@ export function LazilessApp() {
         <div className="flex flex-col gap-5">
           <TodayLog state={state} now={now} />
           <SettingsPanel state={state} dispatch={dispatch} soundOn={soundOn} toggleSound={toggleSound} />
+          <FeedbackPanel />
         </div>
       </div>
 

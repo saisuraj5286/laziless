@@ -1,26 +1,37 @@
-// Example model schema from the Drizzle docs
-// https://orm.drizzle.team/docs/sql-schema-declaration
-
-import { index, pgTableCreator } from "drizzle-orm/pg-core";
+import { pgTableCreator, uniqueIndex } from "drizzle-orm/pg-core";
 
 /**
- * This is an example of how to use the multi-project schema feature of Drizzle ORM. Use the same
- * database instance for multiple projects.
+ * Every table is prefixed with `laziless_` (drizzle.config.ts only manages
+ * tables with that prefix).
  *
- * @see https://orm.drizzle.team/docs/goodies#multi-project-schema
+ * Every table also has Row Level Security enabled with no policies. Supabase
+ * exposes the `public` schema through its auto-generated REST API; with RLS on
+ * and no policies, that API can't read or write these tables. Our server
+ * connects as the table owner, so it isn't affected.
  */
 export const createTable = pgTableCreator((name) => `laziless_${name}`);
 
-export const posts = createTable(
-  "post",
+/** People who asked for an email when the mobile app launches. */
+export const waitlist = createTable(
+  "waitlist",
   (d) => ({
     id: d.integer().primaryKey().generatedByDefaultAsIdentity(),
-    name: d.varchar({ length: 256 }),
-    createdAt: d
-      .timestamp({ withTimezone: true })
-      .$defaultFn(() => /* @__PURE__ */ new Date())
-      .notNull(),
-    updatedAt: d.timestamp({ withTimezone: true }).$onUpdate(() => new Date()),
+    /** Stored trimmed and lowercased, so each person is on the list once. */
+    email: d.varchar({ length: 320 }).notNull(),
+    /** Where they signed up, e.g. "home" or "features". */
+    source: d.varchar({ length: 32 }).notNull(),
+    createdAt: d.timestamp({ withTimezone: true }).defaultNow().notNull(),
   }),
-  (t) => [index("name_idx").on(t.name)],
-);
+  (t) => [uniqueIndex("laziless_waitlist_email_idx").on(t.email)],
+).enableRLS();
+
+/** Messages sent through the feedback form. */
+export const feedback = createTable("feedback", (d) => ({
+  id: d.integer().primaryKey().generatedByDefaultAsIdentity(),
+  message: d.text().notNull(),
+  /** Optional: only given by people who want a reply. */
+  email: d.varchar({ length: 320 }),
+  /** Page the message was sent from, e.g. "demo". */
+  page: d.varchar({ length: 32 }).notNull(),
+  createdAt: d.timestamp({ withTimezone: true }).defaultNow().notNull(),
+})).enableRLS();
