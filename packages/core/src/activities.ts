@@ -1,4 +1,14 @@
-import type { Activity, Settings } from "./types";
+import type { Activity, ActivityCategory, Settings } from "./types";
+
+/** Display name and emoji for each category, in a fixed order. */
+export const CATEGORY_INFO: Record<ActivityCategory, { label: string; emoji: string }> = {
+  hydrate: { label: "Hydrate", emoji: "💧" },
+  move: { label: "Move", emoji: "🚶" },
+  stretch: { label: "Stretch", emoji: "🧍" },
+  breathe: { label: "Breathe", emoji: "🌬️" },
+  eyes: { label: "Eye rest", emoji: "👀" },
+  tidy: { label: "Tidy", emoji: "🧹" },
+};
 
 export const DEFAULT_ACTIVITIES: Activity[] = [
   { id: "water", title: "Drink a glass of water", emoji: "💧", durationSec: 30, category: "hydrate" },

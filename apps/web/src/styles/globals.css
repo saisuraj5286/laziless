@@ -4,6 +4,14 @@
   --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif,
     "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
 
+  /*
+   * Chart marks (stats page). "Done" is the story, "skipped" is context: one
+   * hue plus a gray. Checked against the card surfaces (white / stone-900) for
+   * lightness, contrast and color-blind separation; dark values are below.
+   */
+  --color-chart-done: #059669;
+  --color-chart-skipped: #a8a29e;
+
   --animate-pop: pop 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
 
   @keyframes pop {
@@ -15,6 +23,13 @@
       opacity: 1;
       transform: scale(1);
     }
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-chart-done: #0fae7c;
+    --color-chart-skipped: #6b645f;
   }
 }
 

@@ -3,7 +3,17 @@ import { describe, expect, it } from "vitest";
 import { DEFAULT_SETTINGS } from "./activities";
 import { createInitialState, lazilessReducer, pickActivity } from "./engine";
 import { computeNextReminder, formatCountdown, isWithinActiveHours } from "./schedule";
-import { currentStreak, dayStats } from "./stats";
+import {
+  countsByActivity,
+  countsByPeriod,
+  currentStreak,
+  dayStats,
+  doneByCategory,
+  doneByHour,
+  entriesBetween,
+  longestStreak,
+  summarize,
+} from "./stats";
 import { deserializeState, serializeState } from "./storage";
 import type { LazilessState, Settings } from "./types";
 
@@ -140,6 +150,65 @@ describe("stats", () => {
     expect(currentStreak(log, at(15))).toBe(3);
     expect(currentStreak(log, at(8, 0, 13))).toBe(3);
     expect(currentStreak(log, at(8, 0, 14))).toBe(0);
+  });
+
+  it("finds the longest streak, ignoring skip-only days", () => {
+    expect(longestStreak([])).toBe(0);
+    expect(longestStreak(log)).toBe(3);
+    const gappy = [
+      { activityId: "water", status: "done" as const, at: at(9, 0, 1).getTime() },
+      { activityId: "water", status: "done" as const, at: at(9, 0, 2).getTime() },
+      { activityId: "water", status: "skipped" as const, at: at(9, 0, 3).getTime() },
+      { activityId: "water", status: "done" as const, at: at(9, 0, 5).getTime() },
+      { activityId: "water", status: "done" as const, at: at(23, 0, 5).getTime() },
+    ];
+    expect(longestStreak(gappy)).toBe(2);
+  });
+
+  it("filters to a half-open time range", () => {
+    expect(entriesBetween(log, at(0, 0, 11), at(0, 0, 12))).toHaveLength(1);
+    expect(entriesBetween(log, at(10, 0, 10), at(10, 0, 11))).toHaveLength(1);
+  });
+
+  it("summarizes done, skipped, rate, minutes and active days", () => {
+    expect(summarize(log, DEFAULT_SETTINGS)).toEqual({
+      done: 3,
+      skipped: 1,
+      completionRate: 0.75,
+      activeMinutes: 2, // 3 × 30s water
+      activeDays: 3,
+    });
+    expect(summarize([], DEFAULT_SETTINGS).completionRate).toBeNull();
+  });
+
+  it("counts per day and per week, ignoring entries outside the periods", () => {
+    const daily = countsByPeriod(log, at(15, 0, 11), 1, 2);
+    expect(daily.map(({ done, skipped }) => ({ done, skipped }))).toEqual([
+      { done: 1, skipped: 0 },
+      { done: 1, skipped: 1 },
+    ]);
+    expect(daily[0]?.start).toEqual(at(0, 0, 11));
+
+    const weekly = countsByPeriod(log, at(0, 0, 6), 7, 1);
+    expect(weekly[0]).toMatchObject({ done: 3, skipped: 1 });
+  });
+
+  it("counts done tasks per hour", () => {
+    const hours = doneByHour(log);
+    expect(hours).toHaveLength(24);
+    expect(hours[10]).toBe(2);
+    expect(hours[11]).toBe(0); // the 11:00 entry was skipped
+    expect(hours[12]).toBe(1);
+  });
+
+  it("breaks down by activity and by category", () => {
+    const byActivity = countsByActivity(log, DEFAULT_SETTINGS);
+    expect(byActivity.map((r) => [r.activityId, r.done, r.skipped])).toEqual([
+      ["water", 3, 0],
+      ["squats", 0, 1],
+    ]);
+    expect(byActivity[0]?.activity?.title).toBe("Drink a glass of water");
+    expect(doneByCategory(log, DEFAULT_SETTINGS)).toEqual([{ category: "hydrate", done: 3 }]);
   });
 });
 

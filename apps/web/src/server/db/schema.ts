@@ -1,4 +1,4 @@
-import { pgTableCreator, uniqueIndex } from "drizzle-orm/pg-core";
+import { index, pgTableCreator, uniqueIndex } from "drizzle-orm/pg-core";
 
 /**
  * Every table is prefixed with `laziless_` (drizzle.config.ts only manages
@@ -35,3 +35,35 @@ export const feedback = createTable("feedback", (d) => ({
   page: d.varchar({ length: 32 }).notNull(),
   createdAt: d.timestamp({ withTimezone: true }).defaultNow().notNull(),
 })).enableRLS();
+
+/**
+ * Accounts, for Lucia auth (username + password).
+ * `id` is a random string from Lucia's `generateIdFromEntropySize`, so ids
+ * can't be guessed or counted.
+ */
+export const userTable = createTable(
+  "user",
+  (d) => ({
+    id: d.text().primaryKey(),
+    /** 3–31 characters: a-z, 0-9, "-" and "_". Always stored lowercase. */
+    username: d.text().notNull(),
+    /** Argon2id hash. The password itself is never stored. */
+    passwordHash: d.text("password_hash").notNull(),
+    createdAt: d.timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  }),
+  (t) => [uniqueIndex("laziless_user_username_idx").on(t.username)],
+).enableRLS();
+
+/** Logged-in sessions. The session id is the value of the session cookie. */
+export const sessionTable = createTable(
+  "session",
+  (d) => ({
+    id: d.text().primaryKey(),
+    userId: d
+      .text("user_id")
+      .notNull()
+      .references(() => userTable.id, { onDelete: "cascade" }),
+    expiresAt: d.timestamp("expires_at", { withTimezone: true, mode: "date" }).notNull(),
+  }),
+  (t) => [index("laziless_session_user_id_idx").on(t.userId)],
+).enableRLS();

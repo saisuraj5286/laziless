@@ -14,6 +14,8 @@ const monorepoRoot = path.join(path.dirname(fileURLToPath(import.meta.url)), "..
 const config = {
   // Shared workspace packages ship TypeScript source; let Next compile them.
   transpilePackages: ["@laziless/core"],
+  // Native password-hashing module: load it with Node at runtime, don't bundle it.
+  serverExternalPackages: ["@node-rs/argon2"],
   // Pin the workspace root so Next doesn't pick up stray lockfiles elsewhere.
   outputFileTracingRoot: monorepoRoot,
   turbopack: { root: monorepoRoot },
